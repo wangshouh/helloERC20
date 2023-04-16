@@ -1,12 +1,9 @@
 use helloERC20::ERC20::ERC20;
-use starknet::contract_address_const;
-use starknet::ContractAddress;
-use starknet::testing::set_caller_address;
 use integer::u256;
 use integer::u256_from_felt252;
 
-const NAME: felt252 = 111;
-const SYMBOL: felt252 = 222;
+const NAME: felt252 = 'Test';
+const SYMBOL: felt252 = 'TET';
 const DECIMALS: u8 = 18_u8;
 
 #[test]
