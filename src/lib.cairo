@@ -9,6 +9,7 @@ fn fib(a: felt252, b: felt252, n: felt252) -> felt252 {
 }
 
 mod main;
+mod ERC20;
 
 #[cfg(test)]
 mod tests;
