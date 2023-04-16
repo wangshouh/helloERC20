@@ -87,4 +87,14 @@ mod ERC20 {
         _total_supply::write(_total_supply::read() + amount);
         _balances::write(sender, _balances::read(sender) + amount);
     }
+
+    #[external]
+    fn transfer(to: ContractAddress, amount: u256) {
+        let from = get_caller_address();
+
+        _balances::write(from, _balances::read(from) - amount);
+        _balances::write(to, _balances::read(to) + amount);
+
+        Transfer(from, to, amount);
+    }
 }

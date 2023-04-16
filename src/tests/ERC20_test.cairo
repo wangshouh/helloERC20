@@ -49,3 +49,32 @@ fn test_mint() {
     ERC20::mint(amount);
     assert(ERC20::balance_of(caller) == amount, 'Mint 2000');
 }
+
+#[test]
+#[available_gas(2000000)]
+fn test_transfer() {
+    let from = setUp();
+    let to = contract_address_const::<2>();
+    let amount: u256 = u256_from_felt252(2000);
+
+    ERC20::mint(amount);
+    ERC20::transfer(to, amount);
+
+    assert(ERC20::balance_of(from) == u256_from_felt252(0), 'Balance from = 0');
+    assert(ERC20::balance_of(to) == amount, 'Balance to = 2000');
+}
+
+#[test]
+#[available_gas(2000000)]
+#[should_panic(expected: ('u256_sub Overflow', ))]
+fn test_err_transfer() {
+    let from = setUp();
+    let to = contract_address_const::<2>();
+    let amount: u256 = u256_from_felt252(2000);
+
+    ERC20::mint(amount);
+    ERC20::transfer(to, u256_from_felt252(3000));
+
+    assert(ERC20::balance_of(from) == u256_from_felt252(0), 'Balance from = 0');
+    assert(ERC20::balance_of(to) == amount, 'Balance to = 2000');
+}
