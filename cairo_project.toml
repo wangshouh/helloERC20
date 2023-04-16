@@ -1,0 +1,2 @@
+[crate_roots]
+helloERC20 = "src"
