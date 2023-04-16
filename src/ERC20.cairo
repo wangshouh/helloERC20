@@ -79,4 +79,12 @@ mod ERC20 {
 
         Approval(owner, spender, amount);
     }
+
+    #[external]
+    fn mint(amount: u256) {
+        let sender = get_caller_address();
+
+        _total_supply::write(_total_supply::read() + amount);
+        _balances::write(sender, _balances::read(sender) + amount);
+    }
 }

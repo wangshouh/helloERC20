@@ -39,3 +39,13 @@ fn test_approve() {
 
     assert(ERC20::allowance(caller, spender) == amount, 'Approve should eq 2000');
 }
+
+#[test]
+#[available_gas(2000000)]
+fn test_mint() {
+    let caller = setUp();
+    let amount: u256 = u256_from_felt252(2000);
+
+    ERC20::mint(amount);
+    assert(ERC20::balance_of(caller) == amount, 'Mint 2000');
+}
