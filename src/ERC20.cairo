@@ -35,11 +35,10 @@ mod ERC20 {
     fn Approval(owner: ContractAddress, spender: ContractAddress, value: u256) {}
 
     #[constructor]
-    fn constructor(name: felt252, symbol: felt252, decimals: u8, initial_supply: u256, ) {
+    fn constructor(name: felt252, symbol: felt252, decimals: u8, ) {
         _name::write(name);
         _symbol::write(symbol);
         _decimals::write(decimals);
-        _total_supply::write(initial_supply);
     }
 
     #[view]
@@ -70,5 +69,14 @@ mod ERC20 {
     #[view]
     fn allowance(owner: ContractAddress, spender: ContractAddress) -> u256 {
         _allowances::read((owner, spender))
+    }
+
+    #[external]
+    fn approve(spender: ContractAddress, amount: u256) {
+        let owner = get_caller_address();
+
+        _allowances::write((owner, spender), amount);
+
+        Approval(owner, spender, amount);
     }
 }
