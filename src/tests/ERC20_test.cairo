@@ -53,7 +53,7 @@ fn test_mint() {
     let amount: u256 = u256_from_felt252(2000);
 
     ERC20::mint(amount);
-    assert(ERC20::balance_of(caller) == amount, 'Mint 2000');
+    assert(ERC20::balanceOf(caller) == amount, 'Mint 2000');
 }
 
 #[test]
@@ -66,8 +66,8 @@ fn test_transfer() {
     ERC20::mint(amount);
     ERC20::transfer(to, amount);
 
-    assert(ERC20::balance_of(from) == u256_from_felt252(0), 'Balance from = 0');
-    assert(ERC20::balance_of(to) == amount, 'Balance to = 2000');
+    assert(ERC20::balanceOf(from) == u256_from_felt252(0), 'Balance from = 0');
+    assert(ERC20::balanceOf(to) == amount, 'Balance to = 2000');
 }
 
 #[test]
@@ -81,8 +81,8 @@ fn test_err_transfer() {
     ERC20::mint(amount);
     ERC20::transfer(to, u256_from_felt252(3000));
 
-    assert(ERC20::balance_of(from) == u256_from_felt252(0), 'Balance from = 0');
-    assert(ERC20::balance_of(to) == amount, 'Balance to = 2000');
+    assert(ERC20::balanceOf(from) == u256_from_felt252(0), 'Balance from = 0');
+    assert(ERC20::balanceOf(to) == amount, 'Balance to = 2000');
 }
 
 #[test]
@@ -100,10 +100,10 @@ fn test_transferFrom() {
 
     set_caller_address(from);
 
-    ERC20::transfer_from(owner, to, u256_from_felt252(1000));
+    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
 
-    assert(ERC20::balance_of(owner) == u256_from_felt252(1000), 'Balance owner == 1000');
-    assert(ERC20::balance_of(to) == u256_from_felt252(1000), 'Balance to == 1000');
+    assert(ERC20::balanceOf(owner) == u256_from_felt252(1000), 'Balance owner == 1000');
+    assert(ERC20::balanceOf(to) == u256_from_felt252(1000), 'Balance to == 1000');
     assert(ERC20::allowance(owner, from) == u256_from_felt252(1000), 'Approve == 1000')
 }
 
@@ -123,7 +123,7 @@ fn test_FailtransferFrom() {
 
     set_caller_address(from);
 
-    ERC20::transfer_from(owner, to, amount);
+    ERC20::transferFrom(owner, to, amount);
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn test_MAXApproveTransfer() {
 
     set_caller_address(from);
 
-    ERC20::transfer_from(owner, to, u256_from_felt252(1000));
+    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
 
     assert(ERC20::allowance(owner, from) == max, 'Max Approve invarient')
 }
