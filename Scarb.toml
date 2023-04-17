@@ -1,8 +1,9 @@
 [package]
-name = "helloERC20"
-version = "0.1.0"
+name = "helloERC20" # the name of the package
+version = "0.1.0"    # the current version, obeying semver
 
-# See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest
+[[target.starknet-contract]]
 
-[dependencies]
-# foo = { path = "vendor/foo" }
+[tool.nile_rs]
+artifacts_dir = "./target/release"
+contracts_dir = "./src"
