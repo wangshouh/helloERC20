@@ -11,6 +11,12 @@ const NAME: felt252 = 'Test';
 const SYMBOL: felt252 = 'TET';
 const DECIMALS: u8 = 18_u8;
 
+fn MAX_U256() -> u256 {
+    u256 {
+        low: 0xffffffffffffffffffffffffffffffff_u128, high: 0xffffffffffffffffffffffffffffffff_u128
+    }
+}
+
 fn setUp() -> ContractAddress {
     let caller = contract_address_const::<1>();
     set_caller_address(caller);
@@ -77,4 +83,67 @@ fn test_err_transfer() {
 
     assert(ERC20::balance_of(from) == u256_from_felt252(0), 'Balance from = 0');
     assert(ERC20::balance_of(to) == amount, 'Balance to = 2000');
+}
+
+#[test]
+#[available_gas(2000000)]
+fn test_transferFrom() {
+    let amount: u256 = u256_from_felt252(2000);
+
+    let owner = setUp();
+
+    let from = contract_address_const::<2>();
+    let to = contract_address_const::<3>();
+
+    ERC20::mint(amount);
+    ERC20::approve(from, amount);
+
+    set_caller_address(from);
+
+    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
+
+    assert(ERC20::balance_of(owner) == u256_from_felt252(1000), 'Balance owner == 1000');
+    assert(ERC20::balance_of(to) == u256_from_felt252(1000), 'Balance to == 1000');
+    assert(ERC20::allowance(owner, from) == u256_from_felt252(1000), 'Approve == 1000')
+}
+
+#[test]
+#[available_gas(2000000)]
+#[should_panic(expected: ('u256_sub Overflow', ))]
+fn test_FailtransferFrom() {
+    let amount: u256 = u256_from_felt252(2000);
+
+    let owner = setUp();
+
+    let from = contract_address_const::<2>();
+    let to = contract_address_const::<3>();
+
+    ERC20::mint(amount);
+    ERC20::approve(from, u256_from_felt252(1000));
+
+    set_caller_address(from);
+
+    ERC20::transferFrom(owner, to, amount);
+}
+
+#[test]
+#[available_gas(2000000)]
+fn test_MAXApproveTransfer() {
+    let max: u256 = MAX_U256();
+
+    let amount: u256 = u256_from_felt252(2000);
+
+    let owner = setUp();
+
+    let from = contract_address_const::<2>();
+    let to = contract_address_const::<3>();
+
+    ERC20::mint(amount);
+    ERC20::approve(from, max);
+
+    set_caller_address(from);
+
+    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
+
+    assert(ERC20::allowance(owner, from) == max, 'Max Approve invarient')
 }

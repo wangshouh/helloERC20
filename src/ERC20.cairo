@@ -97,4 +97,24 @@ mod ERC20 {
 
         Transfer(from, to, amount);
     }
+
+    #[external]
+    fn transferFrom(from: ContractAddress, to: ContractAddress, amount: u256) {
+        let caller = get_caller_address();
+        let allowed: u256 = _allowances::read((from, caller));
+
+        let ONES_MASK = 0xffffffffffffffffffffffffffffffff_u128;
+
+        let is_max = (allowed.low == ONES_MASK) & (allowed.high == ONES_MASK);
+
+        if !is_max {
+            _allowances::write((from, caller), allowed - amount);
+            Approval(from, caller, allowed - amount);
+        }
+
+        _balances::write(from, _balances::read(from) - amount);
+        _balances::write(to, _balances::read(to) + amount);
+
+        Transfer(from, to, amount);
+    }
 }
