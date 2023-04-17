@@ -98,7 +98,7 @@ mod ERC20 {
         _balances::write(to, _balances::read(to) + amount);
 
         Transfer(from, to, amount);
-        
+
         true
     }
 
