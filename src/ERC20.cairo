@@ -72,12 +72,14 @@ mod ERC20 {
     }
 
     #[external]
-    fn approve(spender: ContractAddress, amount: u256) {
+    fn approve(spender: ContractAddress, amount: u256) -> bool {
         let owner = get_caller_address();
 
         _allowances::write((owner, spender), amount);
 
         Approval(owner, spender, amount);
+
+        true
     }
 
     #[external]
@@ -89,17 +91,19 @@ mod ERC20 {
     }
 
     #[external]
-    fn transfer(to: ContractAddress, amount: u256) {
+    fn transfer(to: ContractAddress, amount: u256) -> bool {
         let from = get_caller_address();
 
         _balances::write(from, _balances::read(from) - amount);
         _balances::write(to, _balances::read(to) + amount);
 
         Transfer(from, to, amount);
+        
+        true
     }
 
     #[external]
-    fn transferFrom(from: ContractAddress, to: ContractAddress, amount: u256) {
+    fn transfer_from(from: ContractAddress, to: ContractAddress, amount: u256) -> bool {
         let caller = get_caller_address();
         let allowed: u256 = _allowances::read((from, caller));
 
@@ -116,5 +120,7 @@ mod ERC20 {
         _balances::write(to, _balances::read(to) + amount);
 
         Transfer(from, to, amount);
+
+        true
     }
 }

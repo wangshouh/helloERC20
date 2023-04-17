@@ -100,7 +100,7 @@ fn test_transferFrom() {
 
     set_caller_address(from);
 
-    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
+    ERC20::transfer_from(owner, to, u256_from_felt252(1000));
 
     assert(ERC20::balance_of(owner) == u256_from_felt252(1000), 'Balance owner == 1000');
     assert(ERC20::balance_of(to) == u256_from_felt252(1000), 'Balance to == 1000');
@@ -123,7 +123,7 @@ fn test_FailtransferFrom() {
 
     set_caller_address(from);
 
-    ERC20::transferFrom(owner, to, amount);
+    ERC20::transfer_from(owner, to, amount);
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn test_MAXApproveTransfer() {
 
     set_caller_address(from);
 
-    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
+    ERC20::transfer_from(owner, to, u256_from_felt252(1000));
 
     assert(ERC20::allowance(owner, from) == max, 'Max Approve invarient')
 }
