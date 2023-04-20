@@ -19,6 +19,9 @@ mod ERC20 {
     use starknet::ContractAddress;
     use starknet::ContractAddressZeroable;
     use starknet::contract_address_const;
+    
+    use helloERC20::utils::eth_address::EthAddress;
+    use helloERC20::utils::eth_address::EthAddressTrait;
 
     struct Storage {
         _name: felt252,
