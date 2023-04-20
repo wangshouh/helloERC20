@@ -18,6 +18,7 @@ mod ERC20 {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
     use starknet::ContractAddressZeroable;
+    use starknet::contract_address_const;
 
     struct Storage {
         _name: felt252,
@@ -88,6 +89,13 @@ mod ERC20 {
 
         _total_supply::write(_total_supply::read() + amount);
         _balances::write(sender, _balances::read(sender) + amount);
+    }
+
+    fn burn(amount: u256) {
+        let zero_address = contract_address_const::<0>();
+        let sender = get_caller_address();
+        _total_supply::write(_total_supply::read() - amount);
+        _balances::write(sender, _balances::read(sender) - amount);
     }
 
     #[external]

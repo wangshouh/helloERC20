@@ -58,6 +58,17 @@ fn test_mint() {
 
 #[test]
 #[available_gas(2000000)]
+fn test_burn() {
+    let caller = setUp();
+    let amount: u256 = u256_from_felt252(2000);
+
+    ERC20::mint(amount);
+    ERC20::burn(u256_from_felt252(1000));
+    assert(ERC20::balanceOf(caller) == u256_from_felt252(1000), 'Burn 1000');
+}
+
+#[test]
+#[available_gas(2000000)]
 fn test_transfer() {
     let from = setUp();
     let to = contract_address_const::<2>();
