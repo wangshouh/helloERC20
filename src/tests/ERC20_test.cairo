@@ -2,10 +2,15 @@ use helloERC20::ERC20::ERC20;
 use integer::u256;
 use integer::u256_from_felt252;
 use debug::PrintTrait;
+use traits::Into;
 
 use starknet::contract_address_const;
 use starknet::ContractAddress;
 use starknet::testing::set_caller_address;
+
+use helloERC20::utils::eth_address::EthAddress;
+use helloERC20::utils::eth_address::EthAddressTrait;
+use helloERC20::utils::eth_address::EthAddressIntoFelt252;
 
 const NAME: felt252 = 'Test';
 const SYMBOL: felt252 = 'TET';
@@ -27,6 +32,7 @@ fn setUp() -> ContractAddress {
 #[test]
 #[available_gas(2000000)]
 fn test_initializer() {
+    let caller = contract_address_const::<1>();
     ERC20::constructor(NAME, SYMBOL, DECIMALS);
 
     assert(ERC20::name() == NAME, 'Name should be NAME');
@@ -157,4 +163,23 @@ fn test_MAXApproveTransfer() {
     ERC20::transferFrom(owner, to, u256_from_felt252(1000));
 
     assert(ERC20::allowance(owner, from) == max, 'Max Approve invarient')
+}
+
+#[test]
+#[available_gas(2000000)]
+fn test_set_l1_token() {
+    let caller: ContractAddress = setUp();
+    let l1_token: EthAddress = EthAddressTrait::new(0x123);
+    ERC20::set_l1_token(l1_token);
+    assert(ERC20::l1_token::read() == l1_token.into(), 'L1 Token Set')
+}
+
+#[test]
+#[available_gas(2000000)]
+#[should_panic(expected: ('GOVERNOR_ONLY', ))]
+fn test_fail_set_l1_token() {
+    let caller: ContractAddress = setUp();
+    set_caller_address(contract_address_const::<2>());
+    let l1_token: EthAddress = EthAddressTrait::new(0x123);
+    ERC20::set_l1_token(l1_token);
 }

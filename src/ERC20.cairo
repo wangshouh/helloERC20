@@ -19,9 +19,12 @@ mod ERC20 {
     use starknet::ContractAddress;
     use starknet::ContractAddressZeroable;
     use starknet::contract_address_const;
-    
+    use zeroable::Zeroable;
+    use traits::Into;
+
     use helloERC20::utils::eth_address::EthAddress;
-    use helloERC20::utils::eth_address::EthAddressTrait;
+    use helloERC20::utils::eth_address::EthAddressZeroable;
+    use helloERC20::utils::eth_address::EthAddressIntoFelt252;
 
     struct Storage {
         _name: felt252,
@@ -30,6 +33,8 @@ mod ERC20 {
         _total_supply: u256,
         _balances: LegacyMap<ContractAddress, u256>,
         _allowances: LegacyMap<(ContractAddress, ContractAddress), u256>,
+        governor: ContractAddress,
+        l1_token: felt252,
     }
 
     #[event]
@@ -38,11 +43,15 @@ mod ERC20 {
     #[event]
     fn Approval(owner: ContractAddress, spender: ContractAddress, value: u256) {}
 
+    #[event]
+    fn l1_token_set(l1_token_address: EthAddress) {}
+
     #[constructor]
     fn constructor(name: felt252, symbol: felt252, decimals: u8, ) {
         _name::write(name);
         _symbol::write(symbol);
         _decimals::write(decimals);
+        governor::write(get_caller_address());
     }
 
     #[view]
@@ -133,5 +142,17 @@ mod ERC20 {
         Transfer(from, to, amount);
 
         true
+    }
+
+    #[external]
+    fn set_l1_token(l1_token_address: EthAddress) {
+        // The call is restricted to the governor.
+        assert(get_caller_address() == governor::read(), 'GOVERNOR_ONLY');
+
+        assert(l1_token::read().is_zero(), 'L1_token_ALREADY_INITIALIZED');
+        assert(l1_token_address.is_non_zero(), 'ZERO_token_ADDRESS');
+
+        l1_token::write(l1_token_address.into());
+        l1_token_set(l1_token_address);
     }
 }
