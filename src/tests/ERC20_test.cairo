@@ -25,7 +25,7 @@ fn MAX_U256() -> u256 {
 fn setUp() -> ContractAddress {
     let caller = contract_address_const::<1>();
     set_caller_address(caller);
-    ERC20::constructor(NAME, SYMBOL, DECIMALS);
+    ERC20::constructor(NAME, SYMBOL, DECIMALS, caller);
     caller
 }
 
@@ -33,7 +33,7 @@ fn setUp() -> ContractAddress {
 #[available_gas(2000000)]
 fn test_initializer() {
     let caller = contract_address_const::<1>();
-    ERC20::constructor(NAME, SYMBOL, DECIMALS);
+    ERC20::constructor(NAME, SYMBOL, DECIMALS, caller);
 
     assert(ERC20::name() == NAME, 'Name should be NAME');
     assert(ERC20::symbol() == SYMBOL, 'Symbol should be SYMBOL');

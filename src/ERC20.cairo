@@ -19,6 +19,9 @@ mod ERC20 {
     use starknet::ContractAddress;
     use starknet::ContractAddressZeroable;
     use starknet::contract_address_const;
+    use starknet::syscalls::send_message_to_l1_syscall;
+
+    use array::ArrayTrait;
     use zeroable::Zeroable;
     use traits::Into;
 
@@ -46,12 +49,15 @@ mod ERC20 {
     #[event]
     fn l1_token_set(l1_token_address: EthAddress) {}
 
+    #[event]
+    fn TransferToL1(l1_recipient: EthAddress, amount: u256, caller_address: ContractAddress) {}
+
     #[constructor]
-    fn constructor(name: felt252, symbol: felt252, decimals: u8, ) {
+    fn constructor(name: felt252, symbol: felt252, decimals: u8, governor: ContractAddress) {
         _name::write(name);
         _symbol::write(symbol);
         _decimals::write(decimals);
-        governor::write(get_caller_address());
+        governor::write(governor);
     }
 
     #[view]
@@ -154,5 +160,21 @@ mod ERC20 {
 
         l1_token::write(l1_token_address.into());
         l1_token_set(l1_token_address);
+    }
+
+    #[external]
+    fn transfer_to_L1(l1_recipient: EthAddress, amount: u256) {
+        burn(amount);
+        // Call burn on l2_token contract.
+        let caller_address = get_caller_address();
+
+        // Send the message.
+        let mut message_payload: Array<felt252> = ArrayTrait::new();
+        message_payload.append(l1_recipient.into());
+        message_payload.append(amount.low.into());
+        message_payload.append(amount.high.into());
+
+        send_message_to_l1_syscall(to_address: l1_token::read(), payload: message_payload.span());
+        TransferToL1(l1_recipient, amount, caller_address);
     }
 }
