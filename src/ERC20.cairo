@@ -52,6 +52,9 @@ mod ERC20 {
     #[event]
     fn TransferToL1(l1_recipient: EthAddress, amount: u256, caller_address: ContractAddress) {}
 
+    #[event]
+    fn DepositFromL1(account: ContractAddress, amount: u256) {}
+
     #[constructor]
     fn constructor(name: felt252, symbol: felt252, decimals: u8, governor: ContractAddress) {
         _name::write(name);
@@ -176,5 +179,15 @@ mod ERC20 {
 
         send_message_to_l1_syscall(to_address: l1_token::read(), payload: message_payload.span());
         TransferToL1(l1_recipient, amount, caller_address);
+    }
+
+    #[l1_handler]
+    fn despoit_from_L1(from_address: felt252, account: ContractAddress, amount: u256) {
+        assert(from_address == l1_token::read(), 'EXPECTED_FROM_BRIDGE_ONLY');
+
+        _total_supply::write(_total_supply::read() + amount);
+        _balances::write(account, _balances::read(account) + amount);
+
+        DepositFromL1(account, amount);
     }
 }
