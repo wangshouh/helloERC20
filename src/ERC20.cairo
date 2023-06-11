@@ -35,7 +35,6 @@ mod ERC20 {
 
     #[constructor]
     fn constructor(ref self: Storage, name: felt252, symbol: felt252, decimals: u8, ) {
-        // self._name.write(name);
         _name::write(name);
         _symbol::write(symbol);
         _decimals::write(decimals);
