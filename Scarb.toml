@@ -1,8 +1,15 @@
 [package]
 name = "helloERC20" # the name of the package
 version = "0.1.0"    # the current version, obeying semver
+cairo-version = "1.1.0"
+
+[dependencies]
+starknet = ">=1.1.0"
 
 [[target.starknet-contract]]
+sierra = true
+casm = true
+allowed-libfuncs = true
 
 [tool.nile_rs]
 artifacts_dir = "./target/release"
