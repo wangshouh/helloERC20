@@ -17,7 +17,6 @@ mod ERC20 {
     use helloERC20::ERC20::IERC20;
     use starknet::get_caller_address;
     use starknet::ContractAddress;
-    use starknet::ContractAddressZeroable;
 
     struct Storage {
         _name: felt252,
@@ -35,8 +34,9 @@ mod ERC20 {
     fn Approval(owner: ContractAddress, spender: ContractAddress, value: u256) {}
 
     #[constructor]
-    fn constructor(name: felt252, symbol: felt252, decimals: u8, ) {
-        _name::write(name);
+    fn constructor(ref self: Storage, name: felt252, symbol: felt252, decimals: u8, ) {
+        self._name.write(name);
+        // _name::write(name);
         _symbol::write(symbol);
         _decimals::write(decimals);
     }
