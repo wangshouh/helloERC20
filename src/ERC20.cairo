@@ -34,7 +34,7 @@ mod ERC20 {
     fn Approval(owner: ContractAddress, spender: ContractAddress, value: u256) {}
 
     #[constructor]
-    fn constructor(ref self: Storage, name: felt252, symbol: felt252, decimals: u8, ) {
+    fn constructor(name: felt252, symbol: felt252, decimals: u8, ) {
         _name::write(name);
         _symbol::write(symbol);
         _decimals::write(decimals);
