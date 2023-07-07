@@ -5,7 +5,6 @@ use helloERC20::ERC20::IERC20DispatcherTrait;
 use integer::u256;
 use integer::u256_from_felt252;
 
-use debug::PrintTrait;
 use array::ArrayTrait;
 use traits::Into;
 use result::ResultTrait;
@@ -15,7 +14,7 @@ use option::OptionTrait;
 use starknet::contract_address_const;
 use starknet::contract_address::ContractAddress;
 use starknet::testing::{set_caller_address, set_contract_address};
-use starknet::syscalls::{deploy_syscall, get_block_hash_syscall};
+use starknet::syscalls::deploy_syscall;
 use starknet::SyscallResultTrait;
 use starknet::class_hash::Felt252TryIntoClassHash;
 
