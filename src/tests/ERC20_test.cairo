@@ -1,16 +1,25 @@
 use helloERC20::ERC20::ERC20;
+use helloERC20::ERC20::IERC20Dispatcher;
+use helloERC20::ERC20::IERC20DispatcherTrait;
+
 use integer::u256;
 use integer::u256_from_felt252;
-use debug::PrintTrait;
+
+use array::ArrayTrait;
 use traits::Into;
+use result::ResultTrait;
+use traits::TryInto;
+use option::OptionTrait;
 
 use starknet::contract_address_const;
-use starknet::ContractAddress;
-use starknet::testing::set_caller_address;
-
-use helloERC20::utils::eth_address::EthAddress;
-use helloERC20::utils::eth_address::EthAddressTrait;
-use helloERC20::utils::eth_address::EthAddressIntoFelt252;
+use starknet::contract_address::ContractAddress;
+use starknet::testing::{set_caller_address, set_contract_address};
+use starknet::syscalls::deploy_syscall;
+use starknet::SyscallResultTrait;
+use starknet::class_hash::Felt252TryIntoClassHash;
+use starknet::eth_address::EthAddress;
+use starknet::eth_address::EthAddressZeroable;
+use starknet::eth_address::EthAddressIntoFelt252;
 
 const NAME: felt252 = 'Test';
 const SYMBOL: felt252 = 'TET';
@@ -22,84 +31,112 @@ fn MAX_U256() -> u256 {
     }
 }
 
-fn setUp() -> ContractAddress {
+fn setUp() -> (ContractAddress, IERC20Dispatcher) {
     let caller = contract_address_const::<1>();
-    set_caller_address(caller);
-    ERC20::constructor(NAME, SYMBOL, DECIMALS, caller);
-    caller
+    set_contract_address(caller);
+
+    let mut calldata = Default::default();
+    calldata.append(NAME);
+    calldata.append(SYMBOL);
+    calldata.append(DECIMALS.into());
+    calldata.append(caller.into());
+
+    let (erc20_address, _) = deploy_syscall(
+        ERC20::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+    )
+        .unwrap();
+
+    let mut erc20_token = IERC20Dispatcher { contract_address: erc20_address };
+
+    (caller, erc20_token)
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_initializer() {
     let caller = contract_address_const::<1>();
-    ERC20::constructor(NAME, SYMBOL, DECIMALS, caller);
 
-    assert(ERC20::name() == NAME, 'Name should be NAME');
-    assert(ERC20::symbol() == SYMBOL, 'Symbol should be SYMBOL');
-    assert(ERC20::decimals() == 18_u8, 'Decimals should be 18');
+    let mut calldata = Default::default();
+
+    calldata.append(NAME);
+    calldata.append(SYMBOL);
+    calldata.append(DECIMALS.into());
+    calldata.append(caller.into());
+
+    let (erc20_address, _) = deploy_syscall(
+        ERC20::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
+    )
+        .unwrap();
+
+    let mut erc20_token = IERC20Dispatcher { contract_address: erc20_address };
+
+    assert(erc20_token.name() == NAME, 'Name should be NAME');
+    assert(erc20_token.symbol() == SYMBOL, 'Symbol should be SYMBOL');
+    assert(erc20_token.decimals() == 18_u8, 'Decimals should be 18');
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_approve() {
-    let caller: ContractAddress = setUp();
+    let (caller, erc20_token) = setUp();
+
     let spender: ContractAddress = contract_address_const::<2>();
     let amount: u256 = u256_from_felt252(2000);
 
-    ERC20::approve(spender, amount);
+    erc20_token.approve(spender, amount);
 
-    assert(ERC20::allowance(caller, spender) == amount, 'Approve should eq 2000');
+    assert(erc20_token.allowance(caller, spender) == amount, 'Approve should eq 2000');
 }
+
 
 #[test]
 #[available_gas(2000000)]
 fn test_mint() {
-    let caller = setUp();
+    let (caller, erc20_token) = setUp();
     let amount: u256 = u256_from_felt252(2000);
 
-    ERC20::mint(amount);
-    assert(ERC20::balanceOf(caller) == amount, 'Mint 2000');
+    erc20_token.mint(amount);
+    assert(erc20_token.balanceOf(caller) == amount, 'Mint 2000');
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_burn() {
-    let caller = setUp();
+    let (caller, erc20_token) = setUp();
     let amount: u256 = u256_from_felt252(2000);
 
-    ERC20::mint(amount);
-    ERC20::burn(u256_from_felt252(1000));
-    assert(ERC20::balanceOf(caller) == u256_from_felt252(1000), 'Burn 1000');
+    erc20_token.mint(amount);
+    erc20_token.burn(u256_from_felt252(1000));
+    assert(erc20_token.balanceOf(caller) == u256_from_felt252(1000), 'Burn 1000');
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_transfer() {
-    let from = setUp();
+    let (from, erc20_token) = setUp();
     let to = contract_address_const::<2>();
     let amount: u256 = u256_from_felt252(2000);
 
-    ERC20::mint(amount);
-    ERC20::transfer(to, amount);
+    erc20_token.mint(amount);
+    erc20_token.transfer(to, amount);
 
-    assert(ERC20::balanceOf(from) == u256_from_felt252(0), 'Balance from = 0');
-    assert(ERC20::balanceOf(to) == amount, 'Balance to = 2000');
+    assert(erc20_token.balanceOf(from) == u256_from_felt252(0), 'Balance from = 0');
+    assert(erc20_token.balanceOf(to) == amount, 'Balance to = 2000');
 }
 
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('u256_sub Overflow', ))]
+#[should_panic(expected: ('u256_sub Overflow', 'ENTRYPOINT_FAILED', ))]
 fn test_err_transfer() {
-    let from = setUp();
+    let (from, erc20_token) = setUp();
     let to = contract_address_const::<2>();
     let amount: u256 = u256_from_felt252(2000);
 
-    ERC20::mint(amount);
-    ERC20::transfer(to, u256_from_felt252(3000));
+    erc20_token.mint(amount);
+    erc20_token.transfer(to, u256_from_felt252(3000));
 
-    assert(ERC20::balanceOf(from) == u256_from_felt252(0), 'Balance from = 0');
-    assert(ERC20::balanceOf(to) == amount, 'Balance to = 2000');
+    assert(erc20_token.balanceOf(from) == u256_from_felt252(0), 'Balance from = 0');
+    assert(erc20_token.balanceOf(to) == amount, 'Balance to = 2000');
 }
 
 #[test]
@@ -107,40 +144,40 @@ fn test_err_transfer() {
 fn test_transferFrom() {
     let amount: u256 = u256_from_felt252(2000);
 
-    let owner = setUp();
+    let (owner, erc20_token) = setUp();
 
     let from = contract_address_const::<2>();
     let to = contract_address_const::<3>();
 
-    ERC20::mint(amount);
-    ERC20::approve(from, amount);
+    erc20_token.mint(amount);
+    erc20_token.approve(from, amount);
 
-    set_caller_address(from);
+    set_contract_address(from);
 
-    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
+    erc20_token.transferFrom(owner, to, u256_from_felt252(1000));
 
-    assert(ERC20::balanceOf(owner) == u256_from_felt252(1000), 'Balance owner == 1000');
-    assert(ERC20::balanceOf(to) == u256_from_felt252(1000), 'Balance to == 1000');
-    assert(ERC20::allowance(owner, from) == u256_from_felt252(1000), 'Approve == 1000')
+    assert(erc20_token.balanceOf(owner) == u256_from_felt252(1000), 'Balance owner == 1000');
+    assert(erc20_token.balanceOf(to) == u256_from_felt252(1000), 'Balance to == 1000');
+    assert(erc20_token.allowance(owner, from) == u256_from_felt252(1000), 'Approve == 1000')
 }
 
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('u256_sub Overflow', ))]
+#[should_panic(expected: ('u256_sub Overflow', 'ENTRYPOINT_FAILED', ))]
 fn test_FailtransferFrom() {
     let amount: u256 = u256_from_felt252(2000);
 
-    let owner = setUp();
+    let (owner, erc20_token) = setUp();
 
     let from = contract_address_const::<2>();
     let to = contract_address_const::<3>();
 
-    ERC20::mint(amount);
-    ERC20::approve(from, u256_from_felt252(1000));
+    erc20_token.mint(amount);
+    erc20_token.approve(from, u256_from_felt252(1000));
 
-    set_caller_address(from);
+    set_contract_address(from);
 
-    ERC20::transferFrom(owner, to, amount);
+    erc20_token.transferFrom(owner, to, amount);
 }
 
 #[test]
@@ -150,36 +187,36 @@ fn test_MAXApproveTransfer() {
 
     let amount: u256 = u256_from_felt252(2000);
 
-    let owner = setUp();
+    let (owner, erc20_token) = setUp();
 
     let from = contract_address_const::<2>();
     let to = contract_address_const::<3>();
 
-    ERC20::mint(amount);
-    ERC20::approve(from, max);
+    erc20_token.mint(amount);
+    erc20_token.approve(from, max);
 
-    set_caller_address(from);
+    set_contract_address(from);
 
-    ERC20::transferFrom(owner, to, u256_from_felt252(1000));
+    erc20_token.transferFrom(owner, to, u256_from_felt252(1000));
 
-    assert(ERC20::allowance(owner, from) == max, 'Max Approve invarient')
+    assert(erc20_token.allowance(owner, from) == max, 'Max Approve invarient')
 }
 
 #[test]
 #[available_gas(2000000)]
 fn test_set_l1_token() {
-    let caller: ContractAddress = setUp();
-    let l1_token: EthAddress = EthAddressTrait::new(0x123);
-    ERC20::set_l1_token(l1_token);
-    assert(ERC20::l1_token::read() == l1_token.into(), 'L1 Token Set')
+    let (caller, erc20_token) = setUp();
+    let l1_token = EthAddress { address: 0x1234 };
+    erc20_token.set_l1_token(l1_token);
+    assert(erc20_token.l1_token_address() == l1_token.into(), 'L1 Token Set')
 }
-
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('GOVERNOR_ONLY', ))]
+#[should_panic(expected: ('GOVERNOR_ONLY', 'ENTRYPOINT_FAILED', ))]
 fn test_fail_set_l1_token() {
-    let caller: ContractAddress = setUp();
-    set_caller_address(contract_address_const::<2>());
-    let l1_token: EthAddress = EthAddressTrait::new(0x123);
-    ERC20::set_l1_token(l1_token);
+    let (caller, erc20_token) = setUp();
+    set_contract_address(contract_address_const::<2>());
+    let l1_token = EthAddress { address: 0x1234 };
+    erc20_token.set_l1_token(l1_token);
 }
+

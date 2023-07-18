@@ -2,8 +2,8 @@
 name = "helloERC20" # the name of the package
 version = "0.1.0"    # the current version, obeying semver
 
-[[target.starknet-contract]]
+[dependencies]
+starknet = ">=2.0.0"
 
-[tool.nile_rs]
-artifacts_dir = "./target/release"
-contracts_dir = "./src"
+[[target.starknet-contract]]
+allowed-libfuncs = true
