@@ -1,5 +1,6 @@
 use starknet::ContractAddress;
 use starknet::eth_address::EthAddress;
+use starknet::ClassHash;
 
 #[starknet::interface]
 trait IERC20<TContractState> {
@@ -19,12 +20,15 @@ trait IERC20<TContractState> {
     fn burn(ref self: TContractState, amount: u256);
     fn set_l1_token(ref self: TContractState, l1_token_address: EthAddress);
     fn transfer_to_L1(ref self: TContractState, l1_recipient: EthAddress, amount: u256);
+    fn upgrade(self: @TContractState, new_class_hash: ClassHash);
 }
 
 #[starknet::contract]
 mod ERC20 {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
+    use starknet::ClassHash;
+    use starknet::syscalls::replace_class_syscall;
     use starknet::contract_address_const;
     use starknet::syscalls::send_message_to_l1_syscall;
     use starknet::eth_address::EthAddress;
@@ -235,6 +239,10 @@ mod ERC20 {
                         TransferToL1 { l2_sender: caller_address, l1_recipient, value: amount }
                     )
                 )
+        }
+
+        fn upgrade(self: @ContractState, new_class_hash: ClassHash) {
+            replace_class_syscall(new_class_hash);
         }
     }
 
