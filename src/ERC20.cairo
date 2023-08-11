@@ -52,7 +52,7 @@ mod ERC20 {
     }
 
     #[event]
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     enum Event {
         Transfer: Transfer,
         Approval: Approval,
@@ -60,7 +60,7 @@ mod ERC20 {
         TransferToL1: TransferToL1,
         DepositFromL1: DepositFromL1,
     }
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct Transfer {
         #[key]
         from: ContractAddress,
@@ -68,7 +68,7 @@ mod ERC20 {
         to: ContractAddress,
         value: u256,
     }
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct Approval {
         #[key]
         owner: ContractAddress,
@@ -77,13 +77,13 @@ mod ERC20 {
         value: u256,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct SetL1Token {
         #[key]
         l1token: EthAddress
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct TransferToL1 {
         #[key]
         l2_sender: ContractAddress,
@@ -92,7 +92,7 @@ mod ERC20 {
         value: u256,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, PartialEq, starknet::Event)]
     struct DepositFromL1 {
         #[key]
         account: ContractAddress,
