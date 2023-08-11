@@ -82,7 +82,7 @@ fn test_approve() {
     assert(erc20_token.allowance(caller, spender) == amount, 'Approve should eq 2000');
     assert_eq(
         @starknet::testing::pop_log(erc20_address).unwrap(),
-        @Event::Approval(Approval{owner: caller, spender: spender, value: amount}),
+        @Event::Approval(Approval { owner: caller, spender: spender, value: amount }),
         'Approve Emit'
     )
 }
