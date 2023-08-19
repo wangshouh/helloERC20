@@ -20,6 +20,7 @@ trait IERC20<TContractState> {
 mod ERC20 {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
+    use integer::BoundedInt;
 
     #[storage]
     struct Storage {
@@ -120,11 +121,7 @@ mod ERC20 {
             let caller = get_caller_address();
             let allowed: u256 = self._allowances.read((from, caller));
 
-            let ONES_MASK = 0xffffffffffffffffffffffffffffffff_u128;
-
-            let is_max = (allowed.low == ONES_MASK) & (allowed.high == ONES_MASK);
-
-            if !is_max {
+            if !(allowed == BoundedInt::max()) {
                 self._allowances.write((from, caller), allowed - amount);
                 self
                     .emit(
