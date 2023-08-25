@@ -2,6 +2,7 @@ use helloERC20::ERC20::ERC20;
 use helloERC20::ERC20::ERC20::{Event, Approval};
 use helloERC20::ERC20::IERC20Dispatcher;
 use helloERC20::ERC20::IERC20DispatcherTrait;
+use helloERC20::ERC20::ERC20::IERC20Impl;
 
 use integer::u256;
 use integer::u256_from_felt252;
@@ -125,7 +126,7 @@ fn test_transfer() {
 
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('u256_sub Overflow', 'ENTRYPOINT_FAILED', ))]
+#[should_panic(expected: ('u256_sub Overflow', 'ENTRYPOINT_FAILED',))]
 fn test_err_transfer() {
     let (from, erc20_token, _) = setUp();
     let to = contract_address_const::<2>();
@@ -162,7 +163,7 @@ fn test_transferFrom() {
 
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('u256_sub Overflow', 'ENTRYPOINT_FAILED', ))]
+#[should_panic(expected: ('u256_sub Overflow', 'ENTRYPOINT_FAILED',))]
 fn test_FailtransferFrom() {
     let amount: u256 = u256_from_felt252(2000);
 
@@ -209,9 +210,38 @@ fn test_set_l1_token() {
     erc20_token.set_l1_token(l1_token);
     assert(erc20_token.l1_token_address() == l1_token.into(), 'L1 Token Set')
 }
+
 #[test]
 #[available_gas(2000000)]
-#[should_panic(expected: ('GOVERNOR_ONLY', 'ENTRYPOINT_FAILED', ))]
+fn test_l2_to_l1_messages() {
+    let mut erc20_token = ERC20::unsafe_new_contract_state();
+
+    let l1_token = EthAddress { address: 0x1234 };
+    let l1_address = EthAddress { address: 0x4567 };
+
+    let contract_address = contract_address_const::<0x1>();
+    let amount = 2000_u256;
+
+    set_contract_address(contract_address);
+
+    erc20_token.set_l1_token(l1_token);
+    erc20_token.mint(5000);
+    erc20_token.transfer_to_L1(l1_address, amount);
+
+    let except_message: Array<felt252> = array![
+        l1_address.into(), amount.low.into(), amount.high.into()
+    ];
+
+    assert_eq(
+        @starknet::testing::pop_l2_to_l1_message(contract_address).unwrap(),
+        @(l1_token.into(), except_message.span()),
+        'Message l1_token amount'
+    )
+}
+
+#[test]
+#[available_gas(2000000)]
+#[should_panic(expected: ('GOVERNOR_ONLY', 'ENTRYPOINT_FAILED',))]
 fn test_fail_set_l1_token() {
     let (caller, erc20_token, _) = setUp();
     set_contract_address(contract_address_const::<2>());

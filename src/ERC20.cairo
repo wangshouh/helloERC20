@@ -168,7 +168,7 @@ mod ERC20 {
         }
 
         fn burn(ref self: ContractState, amount: u256) {
-            self.burn(amount);
+            self.burn_helper(amount);
         }
 
         fn transfer(ref self: ContractState, to: ContractAddress, amount: u256) -> bool {
@@ -221,7 +221,7 @@ mod ERC20 {
         }
 
         fn transfer_to_L1(ref self: ContractState, l1_recipient: EthAddress, amount: u256) {
-            self.burn(amount);
+            self.burn_helper(amount);
 
             let caller_address = get_caller_address();
 
@@ -233,6 +233,7 @@ mod ERC20 {
             send_message_to_l1_syscall(
                 to_address: self.l1_token.read(), payload: message_payload.span()
             );
+
             self
                 .emit(
                     Event::TransferToL1(
@@ -260,7 +261,7 @@ mod ERC20 {
 
     #[generate_trait]
     impl StorageImpl of StorageTrait {
-        fn burn(ref self: ContractState, amount: u256) {
+        fn burn_helper(ref self: ContractState, amount: u256) {
             let zero_address = contract_address_const::<0>();
             let sender = get_caller_address();
             self._total_supply.write(self._total_supply.read() - amount);
