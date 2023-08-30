@@ -225,10 +225,9 @@ mod ERC20 {
 
             let caller_address = get_caller_address();
 
-            let mut message_payload: Array<felt252> = ArrayTrait::new();
-            message_payload.append(l1_recipient.into());
-            message_payload.append(amount.low.into());
-            message_payload.append(amount.high.into());
+            let mut message_payload = array![
+                l1_recipient.into(), amount.low.into(), amount.high.into()
+            ];
 
             send_message_to_l1_syscall(
                 to_address: self.l1_token.read(), payload: message_payload.span()
