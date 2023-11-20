@@ -1,4 +1,4 @@
-use helloERC20::fib;
+use hello_erc20::fib;
 
 #[test]
 #[available_gas(2000000)]

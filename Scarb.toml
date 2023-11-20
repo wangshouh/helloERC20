@@ -1,9 +1,9 @@
 [package]
-name = "helloERC20" # the name of the package
+name = "hello_erc20" # the name of the package
 version = "0.1.0"    # the current version, obeying semver
 
 [dependencies]
-starknet = ">=2.0.0-rc0"
+starknet = ">=2.1.0"
 
 [[target.starknet-contract]]
 allowed-libfuncs = true

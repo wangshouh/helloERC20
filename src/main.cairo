@@ -1,5 +1,5 @@
 use debug::PrintTrait;
-use helloERC20::fib;
+use hello_erc20::fib;
 
 fn main() {
     let fib5 = fib(0, 1, 5);

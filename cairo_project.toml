@@ -1,2 +1,2 @@
 [crate_roots]
-helloERC20 = "src"
+hello_erc20 = "src"

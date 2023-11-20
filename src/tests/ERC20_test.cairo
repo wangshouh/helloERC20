@@ -1,7 +1,7 @@
-use helloERC20::ERC20::ERC20;
-use helloERC20::ERC20::IERC20Dispatcher;
-use helloERC20::ERC20::IERC20DispatcherTrait;
-use helloERC20::ERC20::ERC20::{Event, Approval};
+use hello_erc20::ERC20::ERC20;
+use hello_erc20::ERC20::IERC20Dispatcher;
+use hello_erc20::ERC20::IERC20DispatcherTrait;
+use hello_erc20::ERC20::ERC20::{Event, Approval};
 
 use integer::u256;
 use integer::u256_from_felt252;
