@@ -52,7 +52,7 @@ fn test_initializer() {
     )
         .unwrap();
 
-    let mut erc20_token = IERC20Dispatcher { contract_address: erc20_address };
+    let erc20_token = IERC20Dispatcher { contract_address: erc20_address };
 
     assert_eq(@erc20_token.name(), @NAME, 'Name should be NAME');
     assert_eq(@erc20_token.symbol(), @SYMBOL, 'Symbol should be SYMBOL');
