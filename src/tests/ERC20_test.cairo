@@ -3,15 +3,9 @@ use hello_erc20::ERC20::IERC20Dispatcher;
 use hello_erc20::ERC20::IERC20DispatcherTrait;
 use hello_erc20::ERC20::ERC20::{Event, Approval};
 
-use integer::u256;
-use integer::u256_from_felt252;
-use integer::BoundedInt;
-
-use array::ArrayTrait;
-use traits::Into;
-use result::ResultTrait;
-use traits::TryInto;
-use option::OptionTrait;
+use core::integer::u256;
+use core::integer::u256_from_felt252;
+use core::integer::BoundedInt;
 
 use starknet::contract_address_const;
 use starknet::contract_address::ContractAddress;
@@ -20,7 +14,7 @@ use starknet::syscalls::deploy_syscall;
 use starknet::SyscallResultTrait;
 use starknet::class_hash::Felt252TryIntoClassHash;
 
-use test::test_utils::assert_eq;
+use core::test::test_utils::assert_eq;
 
 const NAME: felt252 = 'Test';
 const SYMBOL: felt252 = 'TET';

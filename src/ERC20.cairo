@@ -20,7 +20,7 @@ trait IERC20<TContractState> {
 mod ERC20 {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
-    use integer::BoundedInt;
+    use core::integer::BoundedInt;
 
     #[storage]
     struct Storage {
